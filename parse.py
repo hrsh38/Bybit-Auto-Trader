@@ -27,6 +27,8 @@ async def on_message(message):
     trade = extract_info(message.content)
     
     print(trade)
+    # execute trade
+    
        
 
 

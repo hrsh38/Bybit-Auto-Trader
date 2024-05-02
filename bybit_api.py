@@ -19,6 +19,21 @@ def get_positions(symbol):
     # print(positions)
     return positions
 
+def get_all_positions():
+    api_key = "3R7xbpnTG4apkrPHhE"
+    api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
+
+    session = HTTP(
+        api_key=api_key,
+        api_secret=api_secret
+    )
+
+    coins = []
+    # Fetch positions
+    positions_response = session.get_positions(category="linear", settleCoin="USDT")
+    positions = positions_response.get('result', {}).get('list', [])
+    # print(positions)
+    return positions
 
 
 def add_sl(symbol, stopLoss):
@@ -48,7 +63,7 @@ def close_market(symbol, qty, side):
 
 # add_sl('ETHUSDT', )
 
-def set_market_order(symbol, quantity, side):
+def set_market_order(symbol, quantity, side, stop_loss):
     try:
         api_key = "3R7xbpnTG4apkrPHhE"
         api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
@@ -57,7 +72,21 @@ def set_market_order(symbol, quantity, side):
             api_key=api_key,
             api_secret=api_secret
         )
-        res = session.place_order( category='linear', orderType="Market",symbol=symbol, side=side, qty=quantity)
+        res = session.place_order( category='linear', orderType="Market",symbol=symbol, side=side, qty=quantity, stopLoss = stop_loss)
+        print(res)
+    except:
+        print(error)
+
+def set_limit_order(symbol, quantity, limit_price, side, stop_loss):
+    try:
+        api_key = "3R7xbpnTG4apkrPHhE"
+        api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
+
+        session = HTTP(
+            api_key=api_key,
+            api_secret=api_secret
+        )
+        res = session.place_order( category='linear', orderType="Limit",symbol=symbol, side=side, qty=quantity, price = limit_price , stopLoss = stop_loss)
         print(res)
     except:
         print(error)
@@ -104,6 +133,7 @@ def get_account_value():
     account = account_response.get('result', {}).get('list', [])[0]
     return account
     #  return positions_response['totalWalletBalance']
+
 
 def combine_entries(entries):
     combined_entries = []
