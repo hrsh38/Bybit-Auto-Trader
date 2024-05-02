@@ -43,6 +43,7 @@ def update_or_create_trade_signal(trade_info):
 def execute_trade(trade_info):
     """ Logic to execute trade based on updated trade_info """
     print(f"Executing trade for {trade_info['Coin']}")
+    execute_trade(trade_info)
     
     # Add your trading logic here, which may involve calling a trading API or executing other actions
 
