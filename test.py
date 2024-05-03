@@ -38,18 +38,19 @@ def extract_info(text):
     risk_level = re.search(r"and Risk level - (\w+)", text).group(1)
 
         # Extracting take profit levels
-    tp_matches = re.findall(r"🟢 TP\d+: ([\d\.]+)", text)
-    take_profits = {f"{i+1}": float(value) for i, value in enumerate(tp_matches)}
+    tp_matches = [float(match) for match in re.findall(r"🟢 TP\d+: ([\d\.]+)", text)]
+    # print(tp_matches)
+    # take_profits = {f"{i+1}": float(value) for i, value in enumerate(tp_matches)}
 
     # Compiling extracted data into a dictionary
     trade_info = {
-        "Coin": coin_name,
+        "Coin": coin_name+"USDT",
         "Direction": direction,
         # "Leverage": leverage,
         "Entry Zone": entry_zone,
         "Stop Loss": float(stop_loss),
         "Risk Level": risk_level,
-        "TP": take_profits
+        "TP": tp_matches
     }
     return trade_info
 

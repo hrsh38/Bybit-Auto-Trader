@@ -175,7 +175,7 @@ def combine_entries(entries):
 
 # Parameters for the TPSL
 
-def set_tpsl(symbol,quantity, takeProfit, stopLoss):
+def set_tp(symbol,quantity, takeProfit):
     print("SETTING TPSL")
     api_key = "3R7xbpnTG4apkrPHhE"
     api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
@@ -220,6 +220,36 @@ def get_prices():
     # print(prices)
     return prices
 # get_prices()
+def delete_tp_orders(symbol):
+    api_key = "3R7xbpnTG4apkrPHhE"
+    api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
+
+    session = HTTP(
+        api_key=api_key,
+        api_secret=api_secret
+    )
+    try:
+        open_orders = session.get_open_orders(category = 'linear', symbol = symbol).get('result', {}).get('list', [])
+        for order in open_orders:
+            if(order['stopOrderType'] == 'PartialTakeProfit'):
+                delete_order(symbol, order['orderId'])
+    except:
+        print('No orders')
+def delete_dca_orders(symbol):
+    api_key = "3R7xbpnTG4apkrPHhE"
+    api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
+
+    session = HTTP(
+        api_key=api_key,
+        api_secret=api_secret
+    )
+    try:
+        open_orders = session.get_open_orders(category = 'linear', symbol = symbol).get('result', {}).get('list', [])
+        for order in open_orders:
+            if(order['orderType'] == 'Limit'):
+                delete_order(symbol, order['orderId'])
+    except:
+        print('No orders')
 
 def delete_all_orders(symbol):
     api_key = "3R7xbpnTG4apkrPHhE"
