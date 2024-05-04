@@ -45,6 +45,24 @@ def execute_trade(trade):
         res = set_limit_order(trade['Coin'], quantity, entry_prices, side_dict[side[0]], trade['Stop Loss'])
         print(res)
 
+
+def within_percent(arr, num):
+    print(arr, num)
+    threshold = 0.01 * num  # 1% of the input number
+    for i, val in enumerate(arr):
+        if (1 - threshold) * num <= val <= (1 + threshold) * num:
+            return i
+    return None  # Return None if no value is within the range
+
+# def check_and_delete():
+#     positions = get_all_positions()
+#     symbols = [d['symbol'] for d in positions]
+#     # print(symbols)
+#     query = {'Coin': {'$nin': symbols}}  # Select coins that are NOT in the positions list
+#     result = collection.delete_many(query)
+#     print(f"Deleted {result.deleted_count} inactive coin signals.")
+
+
 # print(get_positions('DOGEUSDT'))
 # [{'symbol': 'DOGEUSDT', 'leverage': '75', 'autoAddMargin': 0, 'avgPrice': '0.13297595', 'liqPrice': '', 
 #   'riskLimitValue': '200000', 'takeProfit': '', 'positionValue': '20042.93333707', 'isReduceOnly': False, 

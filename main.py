@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from test import *
 from bybit_api import *
 from pybit.unified_trading import WebSocket
+from trade import execute_trade
 # from your_extraction_module import extract_info  # Make sure to replace this with the actual path to your extraction logic
 
 # MongoDB connection setup
@@ -29,6 +30,7 @@ async def on_message(message):
 
     # Extract trading information from the message
     trade_info = extract_info(message.content)
+    check_and_delete()
     if trade_info:
         query = {'Coin': trade_info['Coin']}
         existing_trade = collection.find_one(query)
@@ -45,7 +47,15 @@ async def on_message(message):
                 for i in range(num_of_tps):
                     set_tp(symbol, size, trade_info['TP'][i])
         else:
-            execute_trade(trade_info)
+            execute_trades(trade_info)
+
+def check_and_delete():
+    positions = get_all_positions()
+    symbols = [d['symbol'] for d in positions]
+    # print(symbols)
+    query = {'Coin': {'$nin': symbols}}  # Select coins that are NOT in the positions list
+    result = collection.delete_many(query)
+    print(f"Deleted {result.deleted_count} inactive coin signals.")
 
 def update_or_create_trade_signal(trade_info):
     """ Updates an existing trade signal or creates a new one if it doesn't exist. """
@@ -55,13 +65,23 @@ def update_or_create_trade_signal(trade_info):
     collection.update_one(query, update, options)
     print(f"Signal processed for {trade_info['Coin']} - updated or inserted as needed.")
 
-def execute_trade(trade_info):
+def execute_trades(trade_info):
     """ Logic to execute trade based on updated trade_info """
     print(f"Executing trade for {trade_info['Coin']}")
     execute_trade(trade_info)
     
     # Add your trading logic here, which may involve calling a trading API or executing other actions
+def closest_index(arr, num):
+    closest_idx = min(range(len(arr)), key=lambda i: abs(arr[i] - num))
+    return closest_idx
 
+def within_percent(arr, num):
+    print(arr, num)
+    threshold = 0.01 * num  # 1% of the input number
+    for i, val in enumerate(arr):
+        if (1 - threshold) * num <= val <= (1 + threshold) * num:
+            return i
+    return None  # Return None if no value is within the range
 
 
 # pybit WebSocket Setup
@@ -84,15 +104,19 @@ ws = WebSocket(
 
 # Logic for stream
 def handle_stream(message):
+    # print(message)
     try:
         orderType=message['data'][0]['orderType']#market = TP, #limit = DCA
+        stopOrderType = message['data'][0]['stopOrderType']
         symbol= message['data'][0]['symbol']
         tp_price = message['data'][0]['execPrice']
         query = {'Coin': symbol}
         coin = collection.find_one(query)
-        print(coin)
+        # print(coin)
+        print(tp_price, orderType, stopOrderType)
         pos = get_positions(symbol)[0]
         #Case 1
+        
         #DCA gets filled -> update the TP's
         if(orderType == 'Limit'):
             print('add in TPs')
@@ -105,20 +129,26 @@ def handle_stream(message):
                     set_tp(symbol, size, coin['TP'][i])
         #Case 2
         #TP's hit -> cancel all other DCA orders and move stop loss up accordingly
-        if(orderType == 'Market'):
+        if(orderType == 'Market' and stopOrderType == 'PartialTakeProfit'):
             delete_dca_orders(symbol)
-            if tp_price in coin['TP']:
-                index = coin['TP'].index(tp_price)
-                if(index == 0):
-                    add_sl(symbol, pos['avgPrice'])
-                else:
-                    add_sl(symbol, coin[index - 1])
+            index = within_percent(coin['TP'], float(tp_price))
+            print(index)
+            if(index == 0):
+                add_sl(symbol, float(pos['avgPrice']))
+            elif(index > 0):
+                add_sl(symbol, coin['TP'][index - 1])
+            else:
+                print('Not within range')
+        check_and_delete()
         #figure out which TP it is
     except:
-        print(message)
+        print('ERROR')
+        # print(message)
 
+check_and_delete()
 ws.execution_stream(callback=handle_stream)
 print('ws is ready')
 # Enter your bot's token here
 BOT_TOKEN = 'MTE5NDUxMjc1ODU5OTg1MjA1Mg.GJYbaG._jSuN1noAtO2JOo9ZW8PrEYZBEbadUJImkcrpw'
 client.run(BOT_TOKEN)
+

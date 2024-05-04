@@ -235,6 +235,7 @@ def delete_tp_orders(symbol):
                 delete_order(symbol, order['orderId'])
     except:
         print('No orders')
+        
 def delete_dca_orders(symbol):
     api_key = "3R7xbpnTG4apkrPHhE"
     api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
