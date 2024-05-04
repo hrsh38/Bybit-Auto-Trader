@@ -290,14 +290,17 @@ def test_func(symbol):
 
 
 def set_max_lev(symbol):
-    api_key = "3R7xbpnTG4apkrPHhE"
-    api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
+    try:
+        api_key = "3R7xbpnTG4apkrPHhE"
+        api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
 
-    session = HTTP(
-        api_key=api_key,
-        api_secret=api_secret
-    )
-    res = session.get_risk_limit(category="linear",symbol=symbol).get('result', {}).get('list', [])
-    maxLev = res[0]['maxLeverage']
-    res = session.set_leverage(category="linear",symbol=symbol,buyLeverage=maxLev,sellLeverage=maxLev)
-    print(res)
+        session = HTTP(
+            api_key=api_key,
+            api_secret=api_secret
+        )
+        res = session.get_risk_limit(category="linear",symbol=symbol).get('result', {}).get('list', [])
+        maxLev = res[0]['maxLeverage']
+        res = session.set_leverage(category="linear",symbol=symbol,buyLeverage=maxLev,sellLeverage=maxLev)
+        print(res)
+    except:
+        print('Leverage Not Changed')
