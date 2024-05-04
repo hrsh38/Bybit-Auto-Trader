@@ -35,6 +35,7 @@ async def on_message(message):
         query = {'Coin': trade_info['Coin']}
         existing_trade = collection.find_one(query)
         # Update database and decide if trading should proceed
+        set_max_lev(trade_info['Coin'])
         update_or_create_trade_signal(trade_info)
         if existing_trade:
             print('add in TPs')

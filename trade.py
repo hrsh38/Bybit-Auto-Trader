@@ -53,7 +53,6 @@ def within_percent(arr, num):
         if (1 - threshold) * num <= val <= (1 + threshold) * num:
             return i
     return None  # Return None if no value is within the range
-
 # def check_and_delete():
 #     positions = get_all_positions()
 #     symbols = [d['symbol'] for d in positions]
