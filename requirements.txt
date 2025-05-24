@@ -1,2 +1,6 @@
-pybit
-discord
+python-dotenv==1.0.0
+pybit==5.5.0
+telethon==1.32.1
+pandas==2.1.4
+numpy==1.26.2
+python-telegram-bot==20.7

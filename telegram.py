@@ -1,22 +1,38 @@
 from telethon import TelegramClient, events, sync
+import os
+from dotenv import load_dotenv
 
-# Use your own values from my.telegram.org
+# Load environment variables
+load_dotenv()
 
-api_id = '12510265'
-api_hash = "9a2309a0a34b0c8d9eee2ce409e4a30a"
+# Get Telegram credentials from environment variables
+api_id = os.getenv('TELEGRAM_API_ID')
+api_hash = os.getenv('TELEGRAM_API_HASH')
+error_id = int(os.getenv('TELEGRAM_ERROR_CHAT_ID', -2069690427))
 
 # The name of the session file (to save your login session, so you don't need to log in every time)
 session_file = 'my_telegram_session'
 
-client = TelegramClient(session_file, api_id, api_hash)
-error_id = -2069690427
+def create_telegram_client():
+    """Create and return a Telegram client instance."""
+    if not api_id or not api_hash:
+        raise ValueError("Telegram API credentials not found in environment variables")
+    
+    return TelegramClient(session_file, api_id, api_hash)
+
+client = create_telegram_client()
 
 @client.on(events.NewMessage())
 async def my_event_handler(event):
+    """Handle new messages in Telegram."""
     print("h", type(event.chat_id), event.chat_id, event.peer_id)
-    if(event.chat_id == error_id):
+    if event.chat_id == error_id:
         print("Error:", event.raw_text)
-    
 
-client.start()
-client.run_until_disconnected()
+def start_telegram_client():
+    """Start the Telegram client."""
+    client.start()
+    client.run_until_disconnected()
+
+if __name__ == "__main__":
+    start_telegram_client()

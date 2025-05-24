@@ -48,11 +48,12 @@ def execute_trade(trade):
 
 def within_percent(arr, num):
     print(arr, num)
-    threshold = 0.01 * num  # 1% of the input number
     for i, val in enumerate(arr):
-        if (1 - threshold) * num <= val <= (1 + threshold) * num:
+        if 0.99*num<= val <= 1.01*num:
             return i
     return None  # Return None if no value is within the range
+
+print(within_percent([0.002029, 0.002176, 0.002279, 0.002425, 0.00255, 0.0035], 0.002028))
 # def check_and_delete():
 #     positions = get_all_positions()
 #     symbols = [d['symbol'] for d in positions]

@@ -5,7 +5,12 @@ from test import *
 from bybit_api import *
 from pybit.unified_trading import WebSocket
 from trade import execute_trade
+import os
+from dotenv import load_dotenv
 # from your_extraction_module import extract_info  # Make sure to replace this with the actual path to your extraction logic
+
+# Load environment variables
+load_dotenv()
 
 # MongoDB connection setup
 client_mongo = MongoClient('mongodb://localhost:27017/')  # Update the connection string as necessary
@@ -71,7 +76,6 @@ def execute_trades(trade_info):
     print(f"Executing trade for {trade_info['Coin']}")
     execute_trade(trade_info)
     
-    # Add your trading logic here, which may involve calling a trading API or executing other actions
 def closest_index(arr, num):
     closest_idx = min(range(len(arr)), key=lambda i: abs(arr[i] - num))
     return closest_idx
@@ -84,24 +88,21 @@ def within_percent(arr, num):
             return i
     return None  # Return None if no value is within the range
 
+# Get API credentials from environment variables
+bybit_api_key = os.getenv('BYBIT_API_KEY')
+bybit_api_secret = os.getenv('BYBIT_API_SECRET')
+discord_bot_token = os.getenv('DISCORD_BOT_TOKEN')
+
+if not all([bybit_api_key, bybit_api_secret, discord_bot_token]):
+    raise ValueError("Missing required API credentials in environment variables")
 
 # pybit WebSocket Setup
 ws = WebSocket(
     testnet=False,
     channel_type="private",
-    api_key = "3R7xbpnTG4apkrPHhE",
-    api_secret = "RHy4YMHIGyL2jla4WwWT2AwnjBpxUclbegRR"
+    api_key=bybit_api_key,
+    api_secret=bybit_api_secret
 )
-# h = {'topic': 'execution', 'id': '130425540_DOGEUSDT_116080561182', 'creationTime': 1714694000130,
-#       'data': [{'category': 'linear', 'symbol': 'DOGEUSDT', 'closedSize': '50', 'execFee': '0.00363275',
-#                  'execId': 'f4f44265-636a-54c0-8a85-d4d10a3d2485', 'execPrice': '0.1321', 'execQty': '50', 
-#                  'execType': 'Trade', 'execValue': '6.605', 'feeRate': '0.00055', 'tradeIv': '', 'markIv': '', 
-#                  'blockTradeId': '', 'markPrice': '0.13209', 'indexPrice': '', 'underlyingPrice': '', 'leavesQty': '0',
-#                    'orderId': 'f356aa12-14d2-4730-b44a-245f9c8a557b', 'orderLinkId': '', 'orderPrice': '0.12549',
-#                      'orderQty': '50', 'orderType': 'Market', 'stopOrderType': 'PartialTakeProfit', 'side': 'Sell',
-#                        'execTime': '1714694000128', 'isLeverage': '0', 'isMaker': False, 'seq': 116080561182, 'marketUnit': '', 
-#                        'createType': 'CreateByPartialTakeProfit'}]}
-
 
 # Logic for stream
 def handle_stream(message):
@@ -149,7 +150,7 @@ def handle_stream(message):
 check_and_delete()
 ws.execution_stream(callback=handle_stream)
 print('ws is ready')
-# Enter your bot's token here
-BOT_TOKEN = 'MTE5NDUxMjc1ODU5OTg1MjA1Mg.GJYbaG._jSuN1noAtO2JOo9ZW8PrEYZBEbadUJImkcrpw'
-client.run(BOT_TOKEN)
+
+# Run Discord bot with token from environment variables
+client.run(discord_bot_token)
 
